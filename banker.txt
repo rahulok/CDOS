@@ -1,0 +1,145 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include<stdbool.h>
+
+
+int allocation[10][10];
+int max[10][10];
+int total[10];
+int presentlyAllocated[10];
+int available[10];
+int need[10][10];
+int flag[10];
+int safeSequence[10];
+bool foundsol = true;
+
+int findIndex( int allocation[10][10], int a[10], int need[10][10], int flag[10], int np, int nr )
+{
+    int i,j;
+
+    for(i=0;i<np;i++)
+    {
+        if( flag[i]==0 )
+        {
+            bool found = true;
+            for(j=0;j<nr;j++ )
+            {
+                if( need[i][j] > a[j] )
+                {
+                    found = false;
+                    break;
+                }
+            }
+            if( found )
+            {
+                flag[i] = 1;
+                for( j=0;j<nr;j++ )
+                {
+                    a[j] += allocation[i][j];
+                }
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+int main()
+{
+
+    int noOfProcesses, noOfResources;
+    int i,j;
+    printf("Enter the number of processes and resources\n");
+    scanf("%d%d",&noOfProcesses,&noOfResources);
+
+
+    for(i=0;i<noOfResources;i++)
+        presentlyAllocated[i] = 0, flag[i] = 0;
+
+    printf("Enter the presently allocated matrix from p%d to p%d\n",0,noOfProcesses-1);
+    for(i=0;i<noOfProcesses;i++)
+        for(j=0;j<noOfResources;j++)
+            scanf("%d",&allocation[i][j]);
+
+    printf("Enter the max matrix from p%d to p%d\n",0,noOfProcesses-1);
+    for(i=0;i<noOfProcesses;i++)
+        for(j=0;j<noOfResources;j++)
+            scanf("%d",&max[i][j]);
+
+    printf("Making the need matrix\n");
+    for(i=0;i<noOfProcesses;i++)
+        for(j=0;j<noOfResources;j++)
+        {
+            need[i][j] = max[i][j] - allocation[i][j];
+        }
+
+    printf("\nThe need matrix is\n");
+    for(i=0;i<noOfProcesses;i++)
+    {
+        for(j=0;j<noOfResources;j++)
+        {
+            printf("%d ",need[i][j]);
+        }
+        printf("\n");
+    }
+
+
+    printf("\nEnter the total resources (%d) : ",noOfResources);
+    for(i=0;i<3;i++)
+            scanf("%d",&total[i]);
+
+    printf("Calculating the total resources presently allocated\n");
+    for(i=0;i<noOfProcesses;i++)
+            for(j=0;j<noOfResources;j++)
+                presentlyAllocated[j] += allocation[i][j];
+
+    printf("\nPresently allocated resources are: ");
+    for(i=0;i<noOfResources;i++)
+        printf("%d ",presentlyAllocated[i]);
+
+    printf("\n\nCalculating the available resources\n");
+    for(i=0;i<noOfResources;i++)
+    {
+        available[i] = total[i]-presentlyAllocated[i];
+    }
+
+    printf("Available resources are : ");
+    for(i=0;i<noOfResources;i++)
+            printf("%d ",available[i]);
+
+    printf("\n\nNow we start allocating resources to processes according to need matrix\n");
+    for(i=0;i<noOfProcesses;i++)
+    {
+        printf("Availabe resouces are ");
+        for(j=0;j<noOfResources;j++)
+        {
+            printf("%d ",available[j]);
+        }
+        printf("\n\n");
+        safeSequence[i] = findIndex(allocation,available,need,flag,noOfProcesses,noOfResources);
+        printf("Found process p(%d)\n\n",safeSequence[i]);
+        if(safeSequence[i] == -1)
+        {
+            foundsol = false;
+            break;
+        }
+        flag[safeSequence[i]] = 1;
+    }
+
+    if(foundsol)
+    {
+        printf("Yes the system is in safe state and the safe sequence is \n");
+        for(i=0;i<noOfProcesses;i++)
+        {
+            printf("p(%d) ",safeSequence[i]);
+        }
+        printf("\n");
+    }
+    else
+    {
+        printf("The system may fall into deadlock");
+    }
+    return 0;
+}
+
+
