@@ -1,0 +1,154 @@
+#include <stdio.h>
+
+void firstfit(int blocks[], int processes[], int nob, int nop)
+{
+    int tempblocks[nob],i,j,count=0;
+    for(i=0;i<nob;i++)                      //So that our original array dosent change
+        tempblocks[i] = blocks[i];
+    for(i=0;i<nop;i++)
+    {
+        for(j=0;j<nob;j++)
+        {
+            if( processes[i] <= tempblocks[j] )
+            {
+                printf("Process %d in block %d\n",i+1,j+1);
+                tempblocks[j] -= processes[i];
+                count++;
+                break;
+            }
+        }
+    }
+    if(count != nop)
+    {
+        printf("Not sufficient memory for all the processes\n");
+    }
+}
+
+int findmin( int blocks[], int processes[], int nob, int nop, int index )
+{
+    int i,j,mindifference = 9999,minindex;
+    for(i=0;i<nob;i++)
+    {
+        if( blocks[i]-processes[index] < mindifference && blocks[i]-processes[index] >=0)
+        {
+            mindifference = blocks[i] - processes[index];
+            minindex = i;
+        }
+    }
+    if(mindifference != 9999)
+        return minindex;
+    else
+        return -1;
+}
+
+
+void bestfit ( int blocks[], int processes[], int nob, int nop)
+{
+    int tempblocks[nob],i,j,flag,minindex;
+    for(i=0;i<nob;i++)                      //So that our original array dosent change
+        tempblocks[i] = blocks[i];
+
+    for(i=0;i<nop;i++)
+    {
+        //printf("\nFor %dth process\n",i+1);
+        for(j=0;j<nob;j++)
+        {
+            minindex = findmin( tempblocks,processes,nob,nop,i);
+            if(minindex != -1)
+            {
+                printf("Process %d in block %d\n",i+1,minindex+1);
+                tempblocks[minindex] -= processes[i];
+                break;
+            }
+            else
+            {
+                printf("Not sufficient memory for all the processes\n");
+                flag = 1;
+                break;
+            }
+        }
+        if(flag)
+            break;
+    }
+}
+
+
+
+int findmax( int blocks[], int processes[], int nob, int nop, int index )
+{
+    int i,j,maxdifference = -1,maxindex;
+    for(i=0;i<nob;i++)
+    {
+        if( blocks[i]-processes[index] > maxdifference && blocks[i]-processes[index] >=0)
+        {
+            maxdifference = blocks[i] - processes[index];
+            maxindex = i;
+        }
+    }
+    if(maxdifference != -1)
+        return maxindex;
+    else
+        return -1;
+}
+
+void worstfit ( int blocks[], int processes[], int nob, int nop)
+{
+    int tempblocks[nob],i,j,flag,maxindex;
+    for(i=0;i<nob;i++)                      //So that our original array dosent change
+        tempblocks[i] = blocks[i];
+
+    for(i=0;i<nop;i++)
+    {
+        //printf("\nFor %dth process\n",i+1);
+        for(j=0;j<nob;j++)
+        {
+            maxindex = findmax( tempblocks,processes,nob,nop,i);
+            if(maxindex != -1)
+            {
+                printf("Process %d in block %d\n",i+1,maxindex+1);
+                tempblocks[maxindex] -= processes[i];
+                break;
+            }
+            else
+            {
+                printf("Not sufficient memory for all the processes\n");
+                flag = 1;
+                break;
+            }
+        }
+        if(flag)
+            break;
+    }
+}
+
+
+int main()
+{
+    int i,j,k,choice;
+    int noOfBlocks,noOfProcesses;
+    printf("Enter the number of memory blocks and number of processes\n");
+    scanf("%d%d",&noOfBlocks,&noOfProcesses);
+    int blocks[noOfBlocks], processes[noOfProcesses];
+    printf("Enter the memory size of %d blocks\n",noOfBlocks);
+    for(i=0;i<noOfBlocks;i++)
+        scanf("%d",&blocks[i]);
+    printf("Enter the need space of %d processes\n",noOfProcesses);
+    for(i=0;i<noOfProcesses;i++)
+        scanf("%d",&processes[i]);
+    while(1)
+    {
+        printf("How do you want to allocate?\n1.First Fit\n2.Best Fit\n3.Worst Fit\n");
+        scanf("%d",&choice);
+        switch(choice)
+        {
+            case 1: firstfit(blocks,processes,noOfBlocks,noOfProcesses);
+                    break;
+            case 2: bestfit(blocks,processes,noOfBlocks,noOfProcesses);
+                    break;
+            case 3: worstfit(blocks,processes,noOfBlocks,noOfProcesses);
+                    break;
+            default:printf("Wrong choice\n");
+        }
+    }
+    return 0;
+}
